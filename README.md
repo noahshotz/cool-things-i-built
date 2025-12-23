@@ -36,7 +36,7 @@ Link zum Repository: https://github.com/noahshotz/s24.com-pgvector
 
 [Schriftliche Ausarbeitung](https://github.com/noahshotz/cool-things-i-built/blob/master/docs/BA.pdf)
 
-Für die Demo während der Verteidigung habe ich auch noch ein einfaches UI in Next.js implementiert, welches die über die API bereitgestellten Funktionen verwendet: -- LINK EINFÜGEN --
+Für die Demo während der Verteidigung habe ich auch noch ein einfaches UI in Next.js implementiert, welches die über die API bereitgestellten Funktionen verwendet: https://github.com/noahshotz/donista-semantic-ui
 
 ## Satelliten-Monitoring
 
