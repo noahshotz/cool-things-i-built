@@ -1,0 +1,183 @@
+name: CI/CD with Coolify
+on:
+  push:
+    branches:
+      - "master"
+      - "dev"
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: "noahshotz/this-is-my-app"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    needs: version
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+      - name: Install dependencies
+        run: npm ci
+      - name: Build the project
+        run: npm run build
+
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+      - name: Install dependencies
+        run: npm ci
+      - name: Run tests
+        run: npm test
+
+  version:
+    runs-on: ubuntu-latest
+    needs: test
+    # Add permissions for the version job
+    permissions:
+      contents: write # Allow pushing tags and commits
+      packages: write
+    outputs:
+      new_version: ${{ steps.semver.outputs.new_version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # Use token with push permissions
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      # Determine version bump type based on commit messages
+      - name: Determine version bump
+        id: bump
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          if [[ $COMMIT_MSG == *"BREAKING CHANGE"* ]]; then
+            echo "bump=major" >> $GITHUB_OUTPUT
+          elif [[ $COMMIT_MSG == *"feat:"* ]]; then
+            echo "bump=minor" >> $GITHUB_OUTPUT
+          else
+            echo "bump=patch" >> $GITHUB_OUTPUT
+          fi
+
+      # Bump version in package.json and create git tag
+      - name: Bump version
+        id: semver
+        run: |
+          # Install semver tool
+          npm install -g semver
+
+          # Get current version from package.json
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+
+          # Calculate new version
+          if [ "${{ steps.bump.outputs.bump }}" == "major" ]; then
+            NEW_VERSION=$(semver $CURRENT_VERSION -i major)
+          elif [ "${{ steps.bump.outputs.bump }}" == "minor" ]; then
+            NEW_VERSION=$(semver $CURRENT_VERSION -i minor)
+          else
+            NEW_VERSION=$(semver $CURRENT_VERSION -i patch)
+          fi
+
+          # Update package.json
+          npm version $NEW_VERSION --no-git-tag-version
+
+          # Set output
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+          # If on master branch, create and push tag
+          if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            git config --local user.email "github-actions[bot]@users.noreply.github.com"
+            git config --local user.name "github-actions[bot]"
+            git add package.json
+            git commit -m "chore: bump version to $NEW_VERSION"
+            git tag -a "v$NEW_VERSION" -m "Version $NEW_VERSION"
+            git push --follow-tags origin HEAD:master
+          fi
+
+  build-and-deploy-dev:
+    runs-on: ubuntu-latest
+    needs: [test, version]
+    if: github.ref == 'refs/heads/dev'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Login to ghcr.io
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.TOKEN }}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:dev
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.version.outputs.new_version }}
+          build-args: |
+            VITE_DEBUG_V=v_alpha
+            VITE_MAPBOX_TOKEN=${{ secrets.VITE_MAPBOX_TOKEN }}
+            VITE_REACT_APP_API_SERVER_URL=${{ secrets.VITE_DEV_REACT_APP_API_SERVER_URL }}
+            VITE_USE_CLOUDINARY=${{ secrets.VITE_USE_CLOUDINARY }}
+      - name: Deploy to Coolify
+        run: |
+          curl --request GET '${{ secrets.DEV_COOLIFY_WEBHOOK }}' --header 'Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}'
+
+  build-and-deploy-master:
+    runs-on: ubuntu-latest
+    needs: [test, version]
+    if: github.ref == 'refs/heads/master'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Login to ghcr.io
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.TOKEN }}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:prod
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.version.outputs.new_version }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          build-args: |
+            VITE_DEBUG_V=v_alpha
+            VITE_MAPBOX_TOKEN=${{ secrets.VITE_MAPBOX_TOKEN }}
+            VITE_REACT_APP_API_SERVER_URL=${{ secrets.VITE_PROD_REACT_APP_API_SERVER_URL }}
+            VITE_USE_CLOUDINARY=${{ secrets.VITE_USE_CLOUDINARY }}
+      - name: Deploy to Coolify
+        run: |
+          curl --request GET '${{ secrets.PROD_COOLIFY_WEBHOOK }}' --header 'Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}'
