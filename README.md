@@ -34,7 +34,7 @@ Die Anwendung habe ich als Erweiterung des in Kotlin geschrieben Haupt-Backend a
 
 Link zum Repository: https://github.com/noahshotz/s24.com-pgvector
 
-Schriftliche Ausarbeitung: -- LINK EINFÜGEN --
+[Schriftliche Ausarbeitung](https://github.com/noahshotz/cool-things-i-built/blob/master/docs/BA.pdf)
 
 Für die Demo während der Verteidigung habe ich auch noch ein einfaches UI in Next.js implementiert, welches die über die API bereitgestellten Funktionen verwendet: -- LINK EINFÜGEN --
 
