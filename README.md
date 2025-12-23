@@ -87,9 +87,13 @@ Um dieses Problem zu umgehen, habe ich den Build-Prozess in eine GitHub Actions 
 
 Der VPS muss somit nur noch das fertige, optimierte Docker Image ausführen, ohne selbst den ressourcenintensiven Build-Prozess durchlaufen zu müssen. Die gesamte Kompilierung findet auf der GitHub-Infrastruktur statt, während der VPS lediglich für das Ausführen der fertigen Container zuständig ist.
 
-Link zur CI/CD-Konfiguration: -- LINK EINFÜGEN --
+Link zur CI/CD-Konfiguration: https://github.com/noahshotz/cool-things-i-built/blob/master/examples/ci-cd/react-docker-coolify.yml
 
 ## Algorithmen
+
+### Projektübersicht
+
+### Implementierung
 
 Link zum Repository: https://github.com/noahshotz/strtocraft
 
