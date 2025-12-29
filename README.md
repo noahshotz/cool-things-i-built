@@ -361,3 +361,7 @@ Als Startup mit schnellen Iterationszyklen treffen wir bewusste Trade-off-Entsch
 Diese bewusste Priorisierung erlaubt uns, schnell auf Nutzerfeedback zu reagieren, während wir technische Schulden dokumentieren und schrittweise adressieren.
 
 ## Projekte im Dezember 2025
+
+- **[Innocence Project Deutschland](https://www.innocence-deutschland.de/)** – Implementierung einer Website mit integriertem CMS (Next.js, Payload, S3 Storage) für die deutsche Repräsentation des internationalen [Innocence Network](https://de.wikipedia.org/wiki/Innocence_Project_Deutschland) – einer Non-Profit-Organisation, die sich für die Wiederaufnahme von Fehlverurteilungen einsetzt.
+
+- **CRM-Pipeline-Integration** – Für ein skalierendes deutsches Unternehmen im Bereich Mietwagen, Mobilitätslösungen und Reparaturservices: Implementierung einer Pipeline, die Kundenanfragen von der Website automatisiert als vorkonfigurierte Tickets in deren CRM-System überführt.
