@@ -316,7 +316,7 @@ Die Plattform basiert auf einem Multi-Tenancy-Modell mit der Organization als ze
 - **Referenzen für Kernbeziehungen:** Facility → Organization als ObjectId-Referenz, da Organizations unabhängig existieren und Facilities bei Bedarf migriert werden können.
 
 **Rollen-Hierarchie pro Organization:**
-```
+
 owner (1x)      → Vollzugriff, kann Organization löschen, Mitglieder verwalten
 maintainer (n)  → Kann Facilities erstellen/bearbeiten, Mitglieder einladen
 staff (n)       → Kann Facilities erstellen/bearbeiten
