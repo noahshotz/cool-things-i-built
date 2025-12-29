@@ -6,6 +6,7 @@
 3. Ressourcenoptimierung mit CI/CD
 4. Algorithmen
 5. System design
+6. Projekte im Dezember 2025
 
 ## Semantic Search Microservice
 
@@ -112,3 +113,251 @@ Die Anwendung wurde als CLI-Tool in C++20 mit CMake implementiert und diente als
 Link zum Repository: https://github.com/noahshotz/strtocraft
 
 ## System design
+
+### Projektübersicht
+
+Seit April 2025 leite ich als Gründungsmitglied die technische Umsetzung der Plattform egenus, die vom egenus e.V. entwickelt und betrieben wird.
+
+Mit egenus stellen wir eine digitale Plattform bereit, die Menschen in schwierigen Lebenslagen den Zugang zu Hilfsangeboten erleichtert. Gleichzeitig sollen soziale Einrichtungen ihre Angebote bestmöglich präsentieren und verwalten können. Barrierefreiheit, Mehrsprachigkeit sowie Werbefreiheit und Datenschutz stehen für uns an erster Stelle.
+
+### Übersicht über die Plattform
+
+Grob zusammengefasst gibt es 2 verschiedene User:
+
+#### Menschen in Not
+
+"In Not" zu sein, bedeutet nicht immer nur Obdachlosigkeit. Soziale Not kann sich auf verschiedenste Weisen abbilden: Armut, Wohnungs- und Obdachlosigkeit, Arbeitslosigkeit und Überschuldung, Lebenskrisen und Wegfall des sozialen Netzes, Einsamkeit, häusliche Gewalt und vieles mehr.
+
+Diesen Menschen geben wir mit unserer Plattform einen direkten, barrierefreien, mehrsprachigen und jederzeit von überall aus erreichbaren Überblick über mögliche Hilfsangebote in ihrer direkten Umgebung.
+
+Schon mit einem einzigen Klick kann dabei der aktuell problematische Lebensumstand angegeben werden.
+
+#### Soziale Einrichtungen
+
+Deutschlandweit verbringen die Mitarbeitenden sozialer Einrichtungen einen Großteil ihrer Arbeit mit der "Arbeit neben der Arbeit" – also verwaltungstechnischen Aufgaben, die Ressourcen einbinden und Mitarbeiter davon abhalten, ihre eigentliche Arbeit machen zu können: Hilfe von Mensch zu Mensch.
+
+Seit inzwischen mehr als einem Jahr sind wir in ständigem Austausch und Partnerschaft mit vielen Einrichtungen, Organisationen und Sozialarbeitern, um deren Bedürfnisse zu verstehen, Lösungen zu implementieren und diese im gemeinsamen Review zu verbessern.
+
+Mit unserer Plattform bieten wir ein umfangreiches Toolset zur Digitalisierung und Verwaltung der Angebote und Möglichkeiten der verschiedenen sozialen Einrichtungen.
+
+### Architektur-Überblick
+
+Die Plattform folgt einer Schichten-Architektur mit klarer Trennung zwischen Präsentations-, Logik- und Datenschicht:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              CLIENTS                                        │
+├─────────────────────┬─────────────────────┬─────────────────────────────────┤
+│   Marketing Site    │   egenus Platform   │         Platform Users          │
+│    (Next.js/TS)     │  (React SPA + Vite) │  Public | Einrichtungen | Admin │
+│    egenus.org       │     egenus.app      │                                 │
+└─────────────────────┴──────────┬──────────┴─────────────────────────────────┘
+                                 │ HTTPS
+                                 ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                            API LAYER                                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                    Node.js / Express REST API (TypeScript)                  │
+│                          api.egenus.app/api/v1/*                            │
+│                                                                             │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐            │
+│  │   /login    │ │  /facility  │ │    /user    │ │/organization│  ...       │
+│  └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘            │
+│                                                                             │
+│  Middleware: CORS | Rate Limiting | JWT Auth | Compression | Validation     │
+└───────────────────────────────────┬─────────────────────────────────────────┘
+                                    │
+              ┌─────────────────────┼─────────────────────┐
+              ▼                     ▼                     ▼
+┌─────────────────────┐ ┌─────────────────────┐ ┌─────────────────────┐
+│      MongoDB        │ │   External APIs     │ │     Monitoring      │
+│   (Prod + Staging)  │ │                     │ │                     │
+│                     │ │  • DeepL            │ │  • Prometheus       │
+│  • Users            │ │  • Brevo.           │ │  • Grafana          │
+│  • Organizations    │ │  • Mapbox           │ │  • PostHog          │
+│  • Facilities       │ │                     │ │                     │
+│  • Logs             │ │                     │ │                     │
+└─────────────────────┘ └─────────────────────┘ └─────────────────────┘
+```
+
+### Tech Stack
+
+| Layer | Technologie | Anmerkungen |
+|-------|-------------|-------------|
+| **Frontend** | React 18, Vite, TypeScript | SPA mit react-router-dom |
+| **UI/Styling** | HeroUI, Tailwind CSS |  |
+| **Forms & Validation** | react-hook-form, zod | Schema-basierte Validierung |
+| **State Management** | React Context + Hooks |  |
+| **Backend** | Node.js, Express, TypeScript | Implementierung als REST API |
+| **Datenbank** | MongoDB + Mongoose | Flexible Schemas für sich entwickelnde Datenmodelle |
+| **Auth** | JWT in HTTP-only Cookies | Rollenbasiert: System-Rollen (admin/user) + Organization-Rollen (owner/maintainer/staff) |
+| **API Docs** | Apidog | Zentrale API-Dokumentation für das Team |
+
+### Deployment & CI/CD
+
+Die gesamte Infrastruktur wird über GitLab CI/CD automatisiert deployed:
+
+```
+┌──────────────┐      ┌──────────────┐      ┌──────────────┐
+│  Feature     │      │     Dev      │      │    Main      │
+│   Branch     │ ──▶  │    Branch    │ ──▶  │   Branch     │
+└──────────────┘      └──────────────┘      └──────────────┘
+       │                     │                     │
+       │                     ▼                     ▼
+       │              ┌─────────────┐       ┌─────────────┐
+       │              │   Staging   │       │ Production  │
+       │              │ Environment │       │ Environment │
+       │              └─────────────┘       └─────────────┘
+       │               dev.egenus.app        egenus.app
+       │              dev.api.egenus.app    api.egenus.app
+       │
+       ▼
+  Code Review
+  via Merge Request
+```
+
+| Komponente | Hosting | Deployment |
+|------------|---------|------------|
+| Frontend | Vercel | Automatisch via GitLab CI |
+| Backend | Railway | Automatisch via GitLab CI |
+| MongoDB | Railway | Managed, wöchentliche Backups |
+| Monitoring | Railway | Prometheus + Grafana Stack |
+
+**CI/CD Pipeline Features:**
+- Automatische Tests (Jest + MongoDB Memory Server für isolierte DB-Tests)
+- Build-Artefakte mit Expiration
+- Branch-basierte Deployment-Targets (main → prod, dev → staging)
+- Automatische Release-Erstellung bei Version-Tags
+
+### API Design
+
+Die REST API folgt einer ressourcenorientierten Struktur mit Versionierung:
+
+```
+POST   /api/v1/login
+GET    /api/v1/facility/:id
+POST   /api/v1/facility
+PATCH  /api/v1/facility/:id
+GET    /api/v1/organization/:id/members
+...
+```
+
+**Security-Maßnahmen:**
+- JWT-Authentifizierung in HTTP-only Cookies
+- Rate Limiting (1000 Requests / 5 Min pro IP)
+- CORS-Whitelist (nur eigene Frontend-Domains)
+- Input-Validierung auf Router-Ebene via express-validator
+- Request Compression (gzip)
+
+**Autorisierungsmodell:**
+```
+System-Ebene:           role: "a" (Admin) | "u" (User)
+
+Organization-Ebene:     role: owner | maintainer | staff
+```
+
+### Datenmodell
+
+Die Plattform basiert auf einem Multi-Tenancy-Modell mit der Organization als zentralem Verwaltungsorgan:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                  USER                                       │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │      id  │ email │ firstName │ lastName │ admin │ organization[]       │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                     │                                       │
+│                    ┌────────────────┴────────────────┐                      │
+│                    ▼                                 ▼                      │
+│     ┌──────────────────────────┐      ┌──────────────────────────┐          │
+│     │  { organizationId: "A",  │      │  { organizationId: "B",  │          │
+│     │    role: "owner" }       │      │    role: "staff" }       │          │
+│     └──────────────────────────┘      └──────────────────────────┘          │
+└─────────────────────────────────────────────────────────────────────────────┘
+                    │                                 │
+                    ▼                                 ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                             ORGANIZATION                                    │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │ orgId │ orgName │ orgAddress │ orgPhone │ isVerified │ orgStatus       │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                     ▲
+                                     │ organization (Reference)
+                                     │
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                               FACILITY                                      │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │ id │ title │ type │ public │ inOperation │ organization │ creator      │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                     │                                       │
+│              ┌──────────────────────┼──────────────────────┐                │
+│              ▼                      ▼                      ▼                │
+│  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐          │
+│  │ address         │    │ services[]      │    │ serviceTimes[]  │          │
+│  │ coordinates     │    │ subfilter[]     │    │ contact[]       │          │
+│  └─────────────────┘    └─────────────────┘    └─────────────────┘          │
+│       Embedded               Embedded               Embedded                │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Kernentitäten:**
+
+| Entität | Beschreibung | Beziehungen |
+|---------|--------------|-------------|
+| **User** | Registrierte Nutzer der Plattform | n:m zu Organizations (mit Rolle pro Org) |
+| **Organization** | Verwaltungsorgan / Tenant | 1:n zu Facilities, 1:n zu User-Memberships |
+| **Facility** | Soziale Einrichtung (für Endnutzer sichtbar) | n:1 zu Organization |
+
+**Design-Entscheidungen:**
+
+- **Memberships im User embedded:** Ein Array von `{ organizationId, role }` im User-Dokument.
+- **Facility-Details embedded:** Services, Öffnungszeiten und Kontaktdaten sind Teil des Facility-Dokuments. Diese Daten werden immer gemeinsam abgefragt.
+- **Referenzen für Kernbeziehungen:** Facility → Organization als ObjectId-Referenz, da Organizations unabhängig existieren und Facilities bei Bedarf migriert werden können.
+
+**Rollen-Hierarchie pro Organization:**
+```
+owner (1x)      → Vollzugriff, kann Organization löschen, Mitglieder verwalten
+maintainer (n)  → Kann Facilities erstellen/bearbeiten, Mitglieder einladen
+staff (n)       → Kann Facilities erstellen/bearbeiten
+
+### Observability
+
+| Tool | Zweck |
+|------|-------|
+| **Prometheus + Grafana** | API-Metriken (Request Rate, Latenz, Error Rate) mit Alerting |
+| **PostHog** | User Analytics und Feature-Tracking |
+| **Custom Logger → MongoDB** | Application Logs, einsehbar im Admin-Dashboard |
+
+### Meine Rolle & Arbeitsweise
+
+Als technischer Lead in einem 4-köpfigen Entwicklerteam verantworte ich:
+
+- **Technische Architekturentscheidungen:** Auswahl von Technologien, Definition von Coding Standards
+- **Entwicklungsprozesse:** Feature-Branch-Workflow mit Merge Requests und Code Reviews
+- **Code Quality:** Code Review, Refactoring, Implementierung von Best Practices
+- **Infrastruktur:** CI/CD-Pipelines, Deployment-Strategie, Monitoring-Setup
+
+**Workflow:**
+1. Feature als Ticket mit Acceptance Criteria definieren
+2. Feature Branch aus `dev` erstellen (`123-feat/feature-name`)
+3. Entwicklung mit lokalem Testing
+4. Merge Request → Code Review → Staging Deployment
+5. QA auf Staging → Merge in `main` → Production Release
+
+### Erkannte Trade-offs & Weiterentwicklung
+
+Als Startup mit schnellen Iterationszyklen treffen wir bewusste Trade-off-Entscheidungen:
+
+| Bereich | Aktueller Stand | Geplante Verbesserung |
+|---------|-----------------|----------------------|
+| **Type Safety** | Manuelle Typ-Synchronisation FE/BE | Shared Types oder Code-Generierung aus API-Spec |
+| **Error Handling** | Verbose Error Messages | Standardisierte Error Codes für i18n und Security |
+| **Testing** | Unit Tests im Backend, Basic im Frontend | E2E-Tests |
+| **Secrets Management** | Environment Variables | Zentrales Secret Management |
+| **Caching** | Noch nicht implementiert | z.B. Redis |
+| **DB Performance** | Keine expliziten Indizes | Index-Strategie bei Performance-Bedarf |
+
+Diese bewusste Priorisierung erlaubt uns, schnell auf Nutzerfeedback zu reagieren, während wir technische Schulden dokumentieren und schrittweise adressieren.
+
+## Projekte im Dezember 2025
