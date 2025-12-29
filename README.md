@@ -97,7 +97,7 @@ Für einen Handelsplatz für virtuelle Gegenstände entwickelte ich einen Algori
 
 Mein Algorithmus ermittelt für eine gegebene Zeichenkette alle möglichen Sticker-Kombinationen, mit denen diese dargestellt werden kann. Geplant war die Integration in ein Web-Interface, über das Nutzer die benötigten Sticker auf der Handelsplattform direkt erwerben können. Der Markt für virtuelle Gegenstände in CS2 erreichte 2025 eine Kapitalisierung von ca. 6 Milliarden Euro.
 
-Nach Änderung des Entwickler des Spiels, Valve, am Anwendungsprinzip der in-game Cosmetics wurde das Projekt nicht weiter verfolgt.
+Nach Änderung des Entwickler des Spiels, Valve, am Anwendungsprinzip der Sticker-Mechaniken wurde das Projekt nicht weiter verfolgt.
 
 ### Implementierung
 
