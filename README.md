@@ -93,7 +93,7 @@ Link zur CI/CD-Konfiguration: https://github.com/noahshotz/cool-things-i-built/b
 
 ### Projektübersicht
 
-Für einen Handelsplatz für virtuelle Gegenstände entwickelte ich einen Algorithmus im Kontext von Counter-Strike 2 (CS2). In diesem Spiel können Spieler digitale Sticker auf ihre Waffen kleben – diese Sticker zeigen oft einzelne Buchstaben oder kurze Zeichenfolgen (z.B. Teamlogos, Spielernamen). Eine beliebte Praxis ist es, Sticker so zu kombinieren, dass sie ein Wort oder einen Namen ergeben.
+Für einen Handelsplatz für virtuelle Gegenstände entwickelte ich einen Algorithmus im Kontext von Counter-Strike:Global Offensive (CS:GO) bzw. Counter-Strike 2 (CS2). In diesem Spiel können Spieler digitale Sticker auf ihre Waffen kleben – diese Sticker zeigen oft einzelne Buchstaben oder kurze Zeichenfolgen (z.B. Teamlogos, Spielernamen). Eine beliebte Praxis ist es, Sticker so zu kombinieren, dass sie ein Wort oder einen Namen ergeben.
 
 Mein Algorithmus ermittelt für eine gegebene Zeichenkette alle möglichen Sticker-Kombinationen, mit denen diese dargestellt werden kann. Geplant war die Integration in ein Web-Interface, über das Nutzer die benötigten Sticker auf der Handelsplattform direkt erwerben können. Der Markt für virtuelle Gegenstände in CS2 erreichte 2025 eine Kapitalisierung von ca. 6 Milliarden Euro.
 
