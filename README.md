@@ -318,7 +318,9 @@ Die Plattform basiert auf einem Multi-Tenancy-Modell mit der Organization als ze
 **Rollen-Hierarchie pro Organization:**
 
 owner (1x)      → Vollzugriff, kann Organization löschen, Mitglieder verwalten
+
 maintainer (n)  → Kann Facilities erstellen/bearbeiten, Mitglieder einladen
+
 staff (n)       → Kann Facilities erstellen/bearbeiten
 
 ### Observability
