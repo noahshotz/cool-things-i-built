@@ -173,7 +173,7 @@ Die Plattform folgt einer Schichten-Architektur mit klarer Trennung zwischen Pr�
 │      MongoDB        │ │   External APIs     │ │     Monitoring      │
 │   (Prod + Staging)  │ │                     │ │                     │
 │                     │ │  • DeepL            │ │  • Prometheus       │
-│  • Users            │ │  • Brevo.           │ │  • Grafana          │
+│  • Users            │ │  • Brevo            │ │  • Grafana          │
 │  • Organizations    │ │  • Mapbox           │ │  • PostHog          │
 │  • Facilities       │ │                     │ │                     │
 │  • Logs             │ │                     │ │                     │
