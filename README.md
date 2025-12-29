@@ -93,7 +93,21 @@ Link zur CI/CD-Konfiguration: https://github.com/noahshotz/cool-things-i-built/b
 
 ### Projektübersicht
 
+Für einen Handelsplatz für virtuelle Gegenstände entwickelte ich einen Algorithmus im Kontext von Counter-Strike 2 (CS2). In diesem Spiel können Spieler digitale Sticker auf ihre Waffen kleben – diese Sticker zeigen oft einzelne Buchstaben oder kurze Zeichenfolgen (z.B. Teamlogos, Spielernamen). Eine beliebte Praxis ist es, Sticker so zu kombinieren, dass sie ein Wort oder einen Namen ergeben.
+
+Mein Algorithmus ermittelt für eine gegebene Zeichenkette alle möglichen Sticker-Kombinationen, mit denen diese dargestellt werden kann. Geplant war die Integration in ein Web-Interface, über das Nutzer die benötigten Sticker auf der Handelsplattform direkt erwerben können. Der Markt für virtuelle Gegenstände in CS2 erreichte 2025 eine Kapitalisierung von ca. 6 Milliarden Euro.
+
+Nach Änderung des Entwickler des Spiels, Valve, am Anwendungsprinzip der in-game Cosmetics wurde das Projekt nicht weiter verfolgt.
+
 ### Implementierung
+
+Der Kern des Algorithmus basiert auf Dynamic Programming. Ein Vektor speichert für jede Position im Input-String alle gültigen Sticker-Kombinationen, die bis zu dieser Position führen. Durch Iteration über alle möglichen Teilstrings und Abgleich mit dem Dictionary werden schrittweise vollständige Lösungen aufgebaut.
+
+**Besonderheiten:**
+- Begrenzung auf maximal 4 Sticker pro Kombination (entspricht den verfügbaren Slots auf den meisten Waffen im Spiel)
+- Sortierung der Ergebnisse nach Länge, um kürzeste Kombinationen zu priorisieren
+
+Die Anwendung wurde als CLI-Tool in C++20 mit CMake implementiert und diente als Referenzimplementierung für eine geplante Web-Integration.
 
 Link zum Repository: https://github.com/noahshotz/strtocraft
 
